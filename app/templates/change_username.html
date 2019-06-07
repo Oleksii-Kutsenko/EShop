@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block content %}
-    <h1>Edit Profile</h1>
+{% block app_content %}
+    <h1>Change username</h1>
     <form action="" method="post">
         {{ form.hidden_tag() }}
         <p>
@@ -10,6 +10,9 @@
             {% for error in form.username.errors %}
                 <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
+        </p>
+        <p>
+            {{ form.submit() }}
         </p>
     </form>
 {% endblock %}

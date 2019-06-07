@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>You haven't access to this page, try to login as admin first</h1>
+    {% if current_user.is_authenticated %}
+        <p><a href="{{ url_for('logout') }}">Logout</a></p>
+    {% else %}
+        <p><a href="{{ url_for('login') }}">Login</a></p>
+    {% endif %}
+    <p><a href="{{ url_for('index') }}">Back</a></p>
+{% endblock %}

@@ -4,7 +4,6 @@ Configuration file for flask app
 import os
 
 
-# pylint: disable=R0903
 class Config():
     """
     Configuration class; imports to __init__.py

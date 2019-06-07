@@ -1,10 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>User: {{ user.username }}</h1>
+    <hr>
+    {% if user.last_seen %}<p id="time">Last seen on:&#8195;</p>{% endif %}
+    {% if user == current_user %}
+        <p><a href="{{ url_for('change_username') }}">Change username</a></p>
+        <p><a href="{{ url_for('change_password') }}">Change password</a></p>
+    {% endif %}
+    <script>
+        function get_local_time() {
+            return (new Date("{{user.last_seen.strftime("%m/%d/%Y %H:%M:%S")}}" + " UTC").toLocaleString('ru'));
+        }
+
+        window.onload = function () {
+            let time = document.getElementById("time");
+            time.innerText += get_local_time()
+        }
+    </script>
+{% endblock %}
