@@ -2,8 +2,8 @@
 Functions that handle requests at end-point
 """
 # pylint: disable=E1101, R0401
-
-from datetime import datetime
+import json
+from datetime import datetime, timedelta
 
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user, login_required
@@ -11,7 +11,7 @@ from werkzeug.urls import url_parse
 
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, ChangePassword, ChangeUsername
-from app.models import User
+from app.models import User, Place, Order
 
 
 @app.before_request
@@ -26,12 +26,19 @@ def before_request():
 
 @app.route('/')
 @app.route('/index')
-@login_required
 def index():
     """
     Return a homepage
     """
-    return render_template('index.html')
+    num = {}
+    for place_type_id in range(1, 4):
+        for place_class in [1, 3, 7, 14, 28]:
+            num[str(place_type_id) + ":" + str(place_class)] = Place.query \
+                .filter(Place.place_class == place_class) \
+                .filter(Place.place_type_id == place_type_id) \
+                .filter(datetime.now() >= Place.release_date) \
+                .count()
+    return render_template('index.html', stock=num)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -129,3 +136,49 @@ def change_password():
         flash("Old password isn't valid")
         return redirect(url_for('change_password'))
     return render_template('change_password.html', title='Edit Password', form=ChangePassword())
+
+
+@app.route('/505', methods=['GET'])
+def internal_error():
+    """
+    Returns 505 error page
+    """
+    return render_template('500.html')
+
+
+@app.route('/cart', methods=['GET'])
+def cart():
+    """
+    Returns cart page
+    """
+    return render_template('cart.html')
+
+
+@app.route('/buy', methods=['POST'])
+def buy():
+    """
+    The endpoint that responses for make Order and changes place taking and release date
+    """
+    session_storage = json.loads(request.data)
+    basket = json.loads(session_storage['basket'])
+    new_order = Order(user_id=current_user.id, status_id=1)
+    for item in basket:
+        number = basket[item]
+        items = item.split(":")
+        query = Place.query.filter(Place.place_type_id == items[0]).filter(
+            Place.place_class == items[2]).filter(Place.release_date < datetime.now())
+        if query.count() >= number:
+            for place in query.all():
+                if basket[item] == 0:
+                    break
+                new_order.place_id.append(place)
+                place.taking_date = datetime.now()
+                place.release_date = place.taking_date + timedelta(32)
+                db.session.add(new_order)
+                basket[item] -= 1
+        else:
+            return 500
+
+        db.session.commit()
+
+    return "", 200

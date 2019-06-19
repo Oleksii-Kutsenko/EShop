@@ -21,4 +21,4 @@ bootstrap = Bootstrap(app)
 
 from app import routes, models, errors, admin_config
 
-admin = admin_config.MyAdmin()
+modified_admin = admin_config.MyAdmin()

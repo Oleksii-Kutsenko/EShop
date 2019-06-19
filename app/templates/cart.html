@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block app_content %}
+
+    <div id="template" class="card-deck">
+    </div>
+    <div id="sum">
+        Sum:
+    </div>
+    {% if current_user.is_anonymous %}
+        <button class="btn btn-dark m-2">
+            <a class="text-light" href="{{ url_for('login') }}">
+                You must login first
+            </a>
+        </button>
+    {% else %}
+        <button class="btn btn-primary m-2" onclick="buy()">Buy</button>
+    {% endif %}
+    <script src="util/node_modules/axios/dist/axios.js"></script>
+    <script>
+        let sum = 0;
+        window.onload = function () {
+            if (sessionStorage.getItem('basket') !== '') {
+                let cart = JSON.parse(sessionStorage.getItem('basket'));
+                let elem = document.getElementById('template');
+                for (let item in cart) {
+                    let x;
+                    if (cart.hasOwnProperty(item)) {
+                        if (cart[item] === 0) {
+                            continue
+                        } else {
+                            x = item.split(':');
+                        }
+                    }
+                    let cart_type = '';
+                    if (x[0] === '1') {
+                        cart_type = 'Открытая площадка';
+                    } else if (x[0] === '2') {
+                        cart_type = 'Сухой склад';
+                    } else {
+                        cart_type = 'Отапливаемый склад';
+                    }
+                    elem.innerHTML += "<div class=\"card m-2\" style=\"width: 18rem;\">" +
+                    "               <div class=\"card-body\">" +
+                    "                   <h5 class=\"card-title\">" + cart_type +
+                    "                   </h5>" +
+                    "                   <div class=\"contaiter row\">" +
+                    "                       <p class=\"col-9 card-text\">" +
+                    "                           Box price: " + x[1] + "<br> Box type: " + x[2] + "<br> Number: " +
+                    cart.hasOwnProperty(item) ? cart[item] : 0 +
+                        "                       </p>" +
+                        "                       <div class=\"col-3\">" +
+                        "                           <img onclick=\"delete_item_from_basket(\'" + item + "\')\" " +
+                        "widht=\"24px\" " +
+                        "                               height=\"24px\" " +
+                        "                               src=\"https://cdn0.iconfinder.com/data/icons/social-messaging-ui-color-shapes/128/trash-circle-red-512.png\" >" +
+                        "                       </div>" +
+                        "                   </div>" +
+                        "               </div>" +
+                        "              </div>";
+                    if (cart.hasOwnProperty(item)) {
+                        sum += x[1] * cart[item]
+                    }
+                }
+                elem = document.getElementById("sum");
+                elem.innerText = "Summary: " + sum
+            }
+        };
+
+
+        function delete_item_from_basket(id) {
+            let cart = JSON.parse(sessionStorage.getItem('basket'));
+            cart[id] -= 1;
+            sessionStorage.setItem('basket', JSON.stringify(cart));
+            document.location.reload()
+        }
+
+        function buy() {
+            let basket = sessionStorage.getItem('basket');
+            if (basket.length >= 2) {
+                axios.post('/buy', {basket})
+                    .then(function (response) {
+                            if (response.status === 200) {
+                                sessionStorage.setItem('basket', JSON.stringify({}));
+                                alert("Your order accepted");
+                                document.location.reload()
+                            }
+                        }
+                    )
+                    .catch(function (error) {
+                        sessionStorage.setItem('basket', JSON.stringify({}));
+                        window.location.replace('http://127.0.0.1:5000/505')
+                    })
+            } else {
+                alert('Cart is empty!')
+            }
+        }
+    </script>
+{% endblock %}

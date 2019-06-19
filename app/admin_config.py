@@ -1,12 +1,12 @@
 """
 The module that configures a flask-admin extension
 """
-from flask_admin import AdminIndexView, Admin
+from flask_admin import AdminIndexView, Admin, BaseView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user
 
 from app import app, db
-from app.models import User, PlaceType, Place, Order
+from app.models import User, PlaceType, Place, Order, OrderStatus
 
 
 class ProtectedIndexView(AdminIndexView):
@@ -25,6 +25,26 @@ class ProtectedIndexView(AdminIndexView):
         return True
 
 
+class OrderModelView(ModelView):
+    """
+    Class that format Order Model view
+    """
+    column_display_pk = True
+
+
+class ExitView(BaseView):
+    """
+    Class that protect admin panel from other user
+    """
+
+    @expose('/')
+    def index(self):
+        """
+        The method that returns admin panel page
+        """
+        return self.render('admin/panel.html')
+
+
 class MyAdmin(Admin):
     """
     The admin class that extends standard and add some views to it
@@ -35,10 +55,12 @@ class MyAdmin(Admin):
         The constructor of the class
         """
         super(MyAdmin, self).__init__(app,
-                                      name='app',
+                                      name='Stock',
                                       template_mode='bootstrap3',
                                       index_view=ProtectedIndexView())
         self.add_view(ModelView(User, db.session))
         self.add_view(ModelView(PlaceType, db.session))
         self.add_view(ModelView(Place, db.session))
-        self.add_view(ModelView(Order, db.session))
+        self.add_view(OrderModelView(Order, db.session))
+        self.add_view(ModelView(OrderStatus, db.session))
+        self.add_view(ExitView(name='Exit', endpoint='logout'))
