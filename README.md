@@ -1,4 +1,4 @@
-#E-shop
+# E-shop
 Simple shop test project. Shop sells places from the stock.
 
 ## Installation
