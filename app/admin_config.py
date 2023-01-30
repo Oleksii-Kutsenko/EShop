@@ -29,6 +29,7 @@ class OrderModelView(ModelView):
     """
     Class that format Order Model view
     """
+
     column_display_pk = True
 
 
@@ -37,12 +38,12 @@ class ExitView(BaseView):
     Class that protect admin panel from other user
     """
 
-    @expose('/')
+    @expose("/")
     def index(self):
         """
         The method that returns admin panel page
         """
-        return self.render('admin/panel.html')
+        return self.render("admin/panel.html")
 
 
 class MyAdmin(Admin):
@@ -54,13 +55,15 @@ class MyAdmin(Admin):
         """
         The constructor of the class
         """
-        super(MyAdmin, self).__init__(app,
-                                      name='Stock',
-                                      template_mode='bootstrap3',
-                                      index_view=ProtectedIndexView())
+        super(MyAdmin, self).__init__(
+            app,
+            name="Stock",
+            template_mode="bootstrap3",
+            index_view=ProtectedIndexView(),
+        )
         self.add_view(ModelView(User, db.session))
         self.add_view(ModelView(PlaceType, db.session))
         self.add_view(ModelView(Place, db.session))
         self.add_view(OrderModelView(Order, db.session))
         self.add_view(ModelView(OrderStatus, db.session))
-        self.add_view(ExitView(name='Exit', endpoint='logout'))
+        self.add_view(ExitView(name="Exit", endpoint="logout"))
