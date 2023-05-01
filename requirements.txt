@@ -2,7 +2,7 @@ alembic==1.0.11
 astroid==2.2.5
 Click==7.0
 dominate==2.3.5
-Flask==1.0.3
+Flask==2.3.2
 Flask-Admin==1.5.3
 Flask-Bootstrap==3.3.7.1
 Flask-Bootstrap4==4.0.2
